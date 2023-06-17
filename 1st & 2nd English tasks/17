@@ -1,0 +1,321 @@
+//Create a program for managing products in a piano store. For that purpose, the class' Piano` * (5 points) * should be created. The class should include:
+//Serial number (array of 25 characters)
+//Price (decimal number)
+//Year of production (integer)
+//For this class, implement a method equals that accepts an object from the Piano class as an argument, 
+//and makes a comparison between the objects on the bases of their serial number. * (5 points) *
+//In addition, for this class, provide a print () method for printing the object in the following format * (5 points) *:
+//[Serial number] [Year of production] [Price]
+//Create a PShop class * (5 points) * that contains:
+//Store name (array of 50 characters)
+//A list of pianos in the store (dynamically allocated array of objects of the Piano class)
+//Number of objects in the array (integer)
+//For this class, provide the following methods:
+//double value () - to calculate the current value of the pianos in the store. It is calculated as a sum of the price of all the pianos in the store * (5 points) *.
+//void add (Piano p) - to add a new piano in the store (adding a new object from the Piano class to the array of pianos) * (10 points) *
+//void sell (Piano p) to delete a given piano from the array (delete all items that are equal to the input argument, according to the serial number) * (10 points) *
+//void print () - to print the information about the store, so that the first row displays its name, and then in each row the information for each piano. * (5 points) *
+//For all classes, define the necessary constructors, destructor and all other methods necessary to provide a correct program functionality.
+//All data members in the classes are private. * (5 points) *
+
+#include <iostream>
+#include <cstring>
+#include <stdlib.h>
+using namespace std;
+
+class Piano{
+    char serialNum[25];
+    float price;
+    int year;
+    void copy(const Piano &other) {
+        this->price=other.price;
+        this->year=other.year;
+        strcpy(this->serialNum,other.serialNum);
+    }
+public:
+    Piano(char *serialNum="", float price=0, int year=0) {
+        this->price=price;
+        this->year=year;
+        strcpy(this->serialNum,serialNum);
+    }
+    Piano(const Piano &other){
+        copy(other);
+    }
+//    Piano & operator =(const Piano &other){
+//        if(this!=&other){
+//            delete []
+//        }
+//    }
+
+    bool equals(Piano &piano) {
+        if(strcmp(serialNum,piano.serialNum)==0){
+            return true;
+        }else return false;
+    }
+    void print(){
+        cout<<serialNum<<" "<<year<<" "<<price<<endl;
+    }
+
+    void setSerial(const char *string) {
+        strcpy(this->serialNum,string);
+    }
+
+    double getPrice() {
+        return price;
+    }
+
+    char *getSerial(){
+        return serialNum;
+    }
+};
+
+class PShop{
+    char name[50];
+    Piano *piano;
+    int numPiano;
+    void copy(const PShop &other){
+        strcpy(this->name,other.name);
+        this->numPiano=other.numPiano;
+        this->piano=new Piano [other.numPiano];
+        for(int i=0;i<this->numPiano;i++){
+            piano[i]=other.piano[i];
+        }
+    }
+public:
+
+    PShop(char *name="") {
+        strcpy(this->name,name);
+        numPiano=0;
+        this->piano=new Piano [numPiano];
+    }
+    PShop(const PShop &other){
+        copy(other);
+    }
+    PShop & operator = (const PShop &other){
+        if(this!=&other){
+            delete [] piano;
+            copy(other);
+        }
+        return *this;
+    }
+    ~PShop(){
+        delete [] piano;
+    }
+
+    void print() {
+        cout<<name<<endl;
+        for(int i=0;i<numPiano;i++){
+            cout<<i+1<<". ";
+            piano[i].print();
+        }
+    }
+
+    double value(){
+        double sum=0;
+        for(int i=0;i<numPiano;i++){
+            sum+=piano[i].getPrice();
+        }
+        return sum;
+    }
+    void add(Piano p){
+        Piano *temp = new Piano [numPiano+1];
+        for(int i=0;i<numPiano;i++){
+            temp[i]=piano[i];
+        }
+        temp[numPiano++]=p;
+        delete [] piano;
+        piano = temp;
+    }
+    void sell(Piano &p){
+        Piano *temp = new Piano [numPiano+1];
+        int j=0;
+        for(int i=0;i<numPiano;i++){
+            if(!piano[i].equals(p)){
+                temp[j++]=piano[i];
+            }
+        }
+        delete [] piano;
+        piano=temp;
+        numPiano=j;
+    }
+
+    Piano getP(int i){
+        return piano[i];
+    }
+};
+
+
+int main() {
+
+    int n;
+    cin >> n;
+
+
+    if(n == 1) {
+        cout << "---Class Piano---" << endl;
+        char serialNo[25];
+        int pYear;
+        float price;
+        cin>>serialNo>>price>>pYear;
+        Piano p(serialNo,price,pYear);
+        p.print();
+    } else if(n == 2) {
+        cout << "---Equals---" << endl;
+        char serialNo[25];
+        int pYear;
+        float price;
+        cin>>serialNo>>price>>pYear;
+        Piano p1(serialNo,price,pYear);
+        Piano p2(p1);
+        if (p1.equals(p2))
+            cout<<"Equality"<<endl;
+        else
+            cout<<"Inequality"<<endl;
+        p2.setSerial("12344");
+        if (p1.equals(p2))
+            cout<<"Equality"<<endl;
+        else
+            cout<<"Inequality"<<endl;
+    }  else if(n == 3) {
+        cout << "---Class PShop---" << endl;
+        char name[50];
+        cin >> name;
+        PShop ps(name);
+        ps.print();
+    } else if(n == 4) {
+        cout << "---Add method---" << endl;
+        char name[50];
+        cin >> name;
+        int no;
+        cin>>no;
+        PShop ps(name);
+        char serialNo[25];
+        int pYear;
+        float price;
+        for (int i=0;i<no;i++) {
+            cin>>serialNo>>price>>pYear;
+            Piano p(serialNo,price,pYear);
+            ps.add(p);
+        }
+        ps.print();
+    } else if(n == 5) {
+        cout << "---Add method---" << endl;
+        char name[50];
+        cin >> name;
+        int no;
+        cin>>no;
+        PShop ps(name);
+        char serialNo[25];
+        int pYear;
+        float price;
+        for (int i=0;i<no;i++) {
+            cin>>serialNo>>price>>pYear;
+            Piano p(serialNo,price,pYear);
+            ps.add(p);
+        }
+        PShop ps2(ps), ps3;
+
+        cin>>serialNo>>price>>pYear;
+        Piano p1(serialNo,price,pYear);
+        ps2.add(p1);
+
+        ps.print();
+        ps2.print();
+
+        ps3 = ps;
+        cin>>serialNo>>price>>pYear;
+        Piano p2(serialNo,price,pYear);
+        ps3.add(p2);
+
+        ps.print();
+        ps3.print();
+
+    } else if(n == 6) {
+        cout << "---value method---" << endl;
+        char name[50];
+        cin >> name;
+        int no;
+        cin>>no;
+        PShop ps(name);
+        char serialNo[25];
+        int pYear;
+        float price;
+        for (int i=0;i<no;i++) {
+            cin>>serialNo>>price>>pYear;
+            Piano p(serialNo,price,pYear);
+            ps.add(p);
+        }
+        cout<<"Total price: "<<ps.value()<<endl;
+    }
+    else if(n == 7) {
+        cout << "---sell method---" << endl;
+        char name[50];
+        cin >> name;
+        int no;
+        cin>>no;
+        PShop ps(name);
+        char serialNo[25];
+        int pYear;
+        float price;
+        for (int i=0;i<no;i++) {
+            cin>>serialNo>>price>>pYear;
+            Piano p(serialNo,price,pYear);
+            ps.add(p);
+        }
+        int d;
+        cin>>d;
+        Piano p1(ps.getP(d).getSerial());
+        ps.sell(p1);
+        ps.print();
+    } else if(n == 8) {
+        cout << "---Full Test---" << endl;
+        char name[50];
+        cin >> name;
+        int no;
+        cin>>no;
+        PShop ps(name);
+        char serialNo[25];
+        int pYear;
+        float price;
+        for (int i=0;i<no;i++) {
+            cin>>serialNo>>price>>pYear;
+            Piano p(serialNo,price,pYear);
+            ps.add(p);
+        }
+        ps.print();
+
+        cout<<endl;
+
+        PShop ps2(ps), ps3;
+
+        cin>>serialNo>>price>>pYear;
+        Piano p1(serialNo,price,pYear);
+        ps2.add(p1);
+
+        ps.print();
+        ps2.print();
+
+        ps3 = ps;
+        cin>>serialNo>>price>>pYear;
+        Piano p2(serialNo,price,pYear);
+        ps3.add(p2);
+
+        ps.print();
+        ps3.print();
+
+        cout<<endl;
+
+        cout<<"Total price: "<<ps.value()<<endl;
+
+        cout<<endl;
+
+        int d;
+        cin>>d;
+        Piano p3(ps.getP(d).getSerial());
+        ps.sell(p3);
+        ps.print();
+
+        cout<<"Total price: "<<ps.value()<<endl;
+    }
+    return 0;
+}
