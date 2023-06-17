@@ -1,0 +1,261 @@
+//Define class Pasta that has info for:
+//name (dynamically allocated array of characters),
+//price (float),
+//        discount (integer in percents) initial value 0.
+//calories (integer)
+//In the class implement:
+//        needed constructors and destructors (see the usage in the main function) (5 points)
+//method print() for printing the data on the OS in the following format:
+//name calories price (price on discount)
+//– part in the price on discount is printed only if the pasta has discount (the value of discount is larger than zero) (5 points)
+//method dby5() for decreasing the discount for 5% (5 points)
+//method light() - from pasta is subtracted integer of calories, the name of the new pasta wet by concatenating Light to the old name,
+//calories are subtracted for the passed value, and the price is decreased by 20%. (10 points)
+//method void setDiscount(int discount) that can change the value of the discount. (10 points)
+//method void setName(char* name) that changes the name of the pasta. (5 points)
+//Create class ItalianRestaurant that has:
+//name (max of 50 chars)
+//dynamically allocated array of objects from class Pasta
+//        number of pasta (integer).
+//Implement in the class:
+//        needed constructors and destructors (see the usage in the main function)
+//method add(Pasta& p) for adding new object from class Pasta in the array (10 points)
+//method print() for printing a list of all pasta in the restaurant. First is printed the name of the restaurant, and then all pasta in new lines. (5 points)
+//method void setPasta(int i, Pasta &p) that changes the pasta at index i in the array with pasta object p (5 points)
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class Pasta{
+    char *name;
+    float price;
+    int discount;
+    int calories;
+    void copy(const Pasta &other){
+        this->discount=other.discount;
+        this->price=other.price;
+        this->calories=other.calories;
+        this->name=new char [strlen(other.name)+1];
+        strcpy(this->name,other.name);
+    }
+public:
+    Pasta(char *name="", float price=0, int calories=0) {
+        this->price=price;
+        this->calories=calories;
+        this->name=new char [strlen(name)+1];
+        strcpy(this->name,name);
+        discount=0;
+    }
+    Pasta(const Pasta &other){
+        copy(other);
+    }
+    Pasta & operator = (const Pasta &other){
+        if(this!=&other){
+            delete [] name;
+            copy(other);
+        }
+        return *this;
+    }
+    ~Pasta(){
+        delete [] name;
+    }
+    void setDiscount(int discount) {
+        Pasta::discount = discount;
+    }
+
+    void setName(char *name) {
+        this->name=new char [strlen(name)+1];
+        strcpy(this->name,name);
+    }
+    void print(){
+        cout<<name<<" "<<calories<<" "<<price<<" ";
+        if(discount>0){
+            cout<<"("<<price * (100 - discount) / 100<<")";
+        }
+    }
+
+    void dby5() {
+        discount-=5;
+    }
+
+    Pasta light(int calories) {
+        char *oldName=name;
+        char *newName = new char [strlen(oldName)+6];
+        strcat(newName,oldName);
+        strcat(newName,"Light");
+        int newCal=this->calories-calories;
+        float newPrice =price - (price*20)/100;
+        Pasta newPasta(newName,newPrice,newCal);
+        newPasta.discount=0;
+        return newPasta;
+    }
+};
+
+class ItalianRestaurant{
+    char name[50];
+    Pasta *arr;
+    int numPasta;
+    void copy(const ItalianRestaurant &other){
+        strcpy(this->name,other.name);
+        this->numPasta=other.numPasta;
+        this->arr = new Pasta [other.numPasta];
+        for(int i=0;i<numPasta;i++){
+            arr[i]=other.arr[i];
+        }
+    }
+public:
+
+    ItalianRestaurant(char name[50]="") {
+        strcpy(this->name,name);
+        this->numPasta=0;
+        this->arr = new Pasta [numPasta];
+    }
+    ItalianRestaurant(const ItalianRestaurant &other){
+        copy(other);
+    }
+    ItalianRestaurant & operator = (const ItalianRestaurant &other){
+        if(this!=&other){
+            delete [] arr;
+            copy(other);
+        }
+        return *this;
+    }
+    ~ItalianRestaurant(){
+        delete [] arr;
+    }
+
+    void add(Pasta &pasta) {
+        Pasta *tmp = new Pasta [numPasta+1];
+        for(int i=0;i<numPasta;i++){
+            tmp[i]=arr[i];
+        }
+        tmp[numPasta++]=pasta;
+        delete [] arr;
+        arr = tmp;
+    }
+
+    void print() {
+        cout<<name<<endl;
+        for(int i=0;i<numPasta;i++){
+            arr[i].print();
+            cout<<endl;
+        }
+    }
+
+    void setPasta(int i, Pasta &p) {
+        arr[i]=p;
+    }
+};
+
+int main() {
+    char name[100];
+    float price;
+    int discount;
+    int calories;
+
+    int testCase;
+
+    cin >> testCase;
+
+    if(testCase == 1) {
+        cout << "====== TESTING Pasta CLASS ======" << endl;
+        cin >> name;
+        cin >> price;
+        cin >> discount;
+        cin >> calories;
+        cout << "CONSTRUCTOR" << endl;
+        Pasta c1(name, price, calories);
+        c1.setDiscount(discount);
+        cin >> name;
+        cin >> price;
+        cin >> discount;
+        cin >> calories;
+        Pasta c2(name, price, calories);
+        c2.setDiscount(discount);
+        cout << "Print" << endl;
+        c1.print();
+        cout << endl;
+        c2.print();
+        cout << endl;
+        cout << "Decrease by 5" << endl;
+        c1.dby5();
+        c1.print();
+        cout << endl;
+        cout << "Calories" << endl;
+        int ca;
+        cin >> ca;
+        Pasta c3 = c1.light(ca);
+        c3.print();
+        cout << endl;
+    } else if(testCase == 2) {
+        cout << "====== TESTING Pasta CONSTRUCTORS ======" << endl;
+        cin >> name;
+        cin >> price;
+        cin >> discount;
+        cin >> calories;
+        cout << "CONSTRUCTOR" << endl;
+        Pasta c1(name, price, calories);
+        c1.print();
+        cout << endl;
+        cout << "COPY CONSTRUCTOR" << endl;
+        Pasta c2(c1);
+        cin >> name;
+        c2.setName(name);
+        c1.print();
+        cout << endl;
+        c2.print();
+        cout << endl;
+        cout << "OPERATOR =" << endl;
+        c1 = c2;
+        cin >> name;
+        c2.setName(name);
+        c1.print();
+        cout << endl;
+        c2.print();
+        cout << endl;
+    } else if(testCase == 3) {
+        cout << "====== TESTING Italian Restaurant ======" << endl;
+        char csName[50];
+        cin >> csName;
+        cout << "CONSTRUCTOR" << endl;
+        ItalianRestaurant cs(csName);
+        int n;
+        cin >> n;
+        cout << "Add" << endl;
+        for(int i = 0; i < n; ++i) {
+            cin >> name;
+            cin >> price;
+            cin >> calories;
+            Pasta c(name, price, calories);
+            cs.add(c);
+        }
+        cs.print();
+        cout << endl;
+
+    } else if(testCase == 4) {
+        cout << "====== TESTING Italian Restaurant CONSTRUCTORS ======" << endl;
+        char csName[50];
+        cin >> csName;
+        ItalianRestaurant cs(csName);
+        int n;
+        cin >> n;
+        for(int i = 0; i < n; ++i) {
+            cin >> name;
+            cin >> price;
+            cin >> calories;
+            Pasta c(name, price, calories);
+            cs.add(c);
+        }
+        Pasta x("Funghi", 260, 275);
+        ItalianRestaurant cp = cs;
+        cs.setPasta(0, x);
+        cs.print();
+        cout << endl;
+        cp.print();
+        cout << endl;
+    }
+
+
+    return 0;
+}
