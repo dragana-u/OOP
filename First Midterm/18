@@ -1,0 +1,87 @@
+//Да се креира структура SkiLift во која се чуваат податоци за името на ски лифтот (низа од 15 знаци),
+//максимален број на корисници што може да опслужи на едно возење, дали е пуштен во функција.
+//Потоа да се креирa структура SkiCenter во која се чуваат податоци за името на скијачкиот центар, 
+//држава во која се наоѓа (низи од 20 знаци), низа од ски лифтови (макс 20) што ги има и број на ски лифтови.
+//Треба да се направи функција со потпис
+//void najgolemKapacitet(SkiCenter *sc, int n)
+//која што ќе го отпечати ски центарот што има најголем капацитет за опслужување скијачи 
+//(вкупниот број на скијачи кои може да се опслужуваат во еден момент вкупно на сите ски лифтови во центарот). 
+//Доколку два ски центри имаат ист капацитет, тогаш се печати оној кој има поголем број на ски лифтови. Притоа 
+//треба да се испечатат во посебен ред името, државата и 
+//капацитетот на ски центарот. Кога се пресметува капацитет на еден ски центар во предвид се земаат 
+//само ски лифтовите кои се поставени дека се во функција.
+
+#include<stdio.h>
+#include<string.h>
+
+typedef struct skiLift{
+    char ime[15];
+    int maxKorisnici;
+    int voFunkcija; //1 da 0 ne
+}skiLift;
+
+typedef struct skiCenter{
+    char name[20];
+    char drzava[20];
+    skiLift niza[20];
+    int brNaSkiLiftovi;
+}skiCenter;
+
+void readCenter(skiCenter *sc){
+    scanf("%s %s %d",sc->name,sc->drzava,&sc->brNaSkiLiftovi);
+}
+
+void readLift(skiCenter *sc){
+    for(int j=0;j<sc->brNaSkiLiftovi;j++){
+        scanf("%s %d %d",sc->niza[j].ime,&sc->niza[j].maxKorisnici,&sc->niza[j].voFunkcija);
+    }
+}
+
+void najgolemKapacitet(skiCenter *sc, int n){
+    int najgolemKapacitet=0, najI=0;
+    int count=0;
+    for(int i=0;i<n;i++){
+        for(int j=0;j<sc[i].brNaSkiLiftovi;j++){
+            if(sc[i].niza[j].voFunkcija==1){
+                count+=sc[i].niza[j].maxKorisnici;
+            }
+        }
+        if(count>najgolemKapacitet){
+            najI=i;
+            najgolemKapacitet=count;
+        }else if(count==najgolemKapacitet){
+            if(sc[i].brNaSkiLiftovi>sc[najI].brNaSkiLiftovi){
+                najI=i;
+                najgolemKapacitet=count;
+            }
+        }
+        count=0;
+    }
+    printf("%s\n%s\n%d",sc[najI].name,sc[najI].drzava,najgolemKapacitet);
+}
+
+//void printCenter(skiCenter sc){
+//    printf("%s %s %d",sc.name,sc.drzava,sc.brNaSkiLiftovi);
+//}
+//void printSki(skiCenter sc){
+//    for(int j=0;j<sc.brNaSkiLiftovi;j++){
+//        printf("%s %d %d",sc.niza[j].ime,sc.niza[j].maxKorisnici,sc.niza[j].voFunkcija);
+//    }
+//}
+
+int main()
+{
+    int n,i;
+    skiCenter sc[100];
+    scanf("%d", &n);
+    for (i = 0; i < n; i++){
+        readCenter(&sc[i]);
+        readLift(&sc[i]);
+//        printCenter(sc[i]);
+//        printSki(sc[i]);
+    }
+
+    najgolemKapacitet(sc,n);
+
+    return 0;
+}
