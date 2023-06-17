@@ -1,0 +1,89 @@
+//Во програмскиот јазик C да се креира структура Pacient и истата треба да содржи: (5 поени)
+//Име и презиме на пациентот ( низа од макс. 100 знаци)
+//Дали е здраствено осигуран (1-да, 0-не)
+//Број на прегледи во текот на последниот месец (цел број)
+//Да се креира структура MaticenDoktor, која во себе содржи: (5 поени)
+//Име на докторот (низа од 100 знаци)
+//Број на пациенти (цел број)
+//Листа од пациенти (низа од максимум 200 елементи од структурата Pacient)
+//Цена на преглед (децимален број)
+//Да се креираат метода najuspesen_doktor, која прима низа од променливи од типот MaticenDoktor и нивниот број; и го печати името, 
+//заработената сума и бројот на прегледи на оној доктор кој заработил најголема сума од пациенти кои ги прегледувал приватно (не се здраствено осигурани) (10 поени). 
+//Доколку два или повеќе доктори имаат иста сума, 
+//тогаш се печати оној доктор кој има направено најголем број на прегледи вкупно во текот на последниот месец. (20 поени)
+//Функционалност (5 поени).
+
+#include<stdio.h>
+
+typedef struct pacient{
+    char name[100];
+    int osiguruvanje; //1 da 0 ne
+    int brojPregledi;
+}pacient;
+
+typedef struct MaticenDoktor{
+    char name[100];
+    int brojPacienti;
+    pacient lista[10];
+    float cena;
+}doktor;
+
+void readDoktor(doktor *md){
+    scanf("%s %d %f",md->name,&md->brojPacienti,&md->cena);
+}
+
+void readPacient(doktor *md){
+    for(int j=0;j<md->brojPacienti;j++) {
+        scanf("%s %d %d",md->lista[j].name,&md->lista[j].osiguruvanje,&md->lista[j].brojPregledi);
+    }
+}
+
+void najuspesen_doktor(doktor *md,int n){
+    int count=0;
+    float suma=0;
+    float maxSuma=0;
+    int najI=0;
+    int vkcount=0;
+    int maxCount=0;
+    int maxvkcount=0;
+    for(int i=0;i<n;i++) {
+        for (int j = 0; j < md[i].brojPacienti; j++) {
+            if (md[i].lista[j].osiguruvanje == 0) {
+                count += md[i].lista[j].brojPregledi;
+            }
+            vkcount+=md[i].lista[j].brojPregledi;
+        }
+        suma = (float) count * md[i].cena;
+        if (suma > maxSuma) {
+            maxSuma = suma;
+            najI = i;
+            maxCount=count;
+            maxvkcount=vkcount;
+        }else if(maxSuma==suma){
+            if(vkcount>maxvkcount){
+                maxSuma=suma;
+                najI=i;
+                maxCount=count;
+                maxvkcount=vkcount;
+            }
+        }
+        count=0;
+        vkcount=0;
+    }
+    printf("%s %.2f %d",md[najI].name,maxSuma,maxvkcount);
+}
+
+int main()
+{
+    int i,n;
+    doktor md[200];
+    scanf("%d", &n);
+    for (i = 0; i < n; i++){
+        readDoktor(&md[i]);
+        readPacient(&md[i]);
+
+    }
+    najuspesen_doktor(md, n);
+
+    return 0;
+}
