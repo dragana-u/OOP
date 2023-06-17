@@ -1,0 +1,51 @@
+Define a structure for Driver with fields for his name (char array of max 100) and time in seconds (integer). (5 points)
+//Then define a structure Race with fields for location (char array of max 100), number of drivers (integers) and an array of drivers (max 100). (5 points)
+//Write a main function that will read the data for N races and for each race will print the top 3 drivers by their time in increasing order. (30 points)
+//For the format of the input data and format of the output, see the sample input and sample output
+//        (the time is printed in two fixed places for minutes and two fixed places with leading zero for seconds, separated with :).
+
+#include <stdio.h>
+
+typedef struct driver{
+    char name[50];
+    int timeSec;
+}driver;
+
+typedef struct race{
+    char location[50];
+    int numDrivers;
+    driver drivers[100];
+}race;
+
+int main(){
+    int n;
+    race race[50];
+    scanf("%d",&n);
+    for(int i=0;i<n;i++){
+        scanf("%s %d",race[i].location,&race[i].numDrivers);
+        for(int j=0;j<race[i].numDrivers;j++){
+            scanf("%s %d",race[i].drivers[j].name,&race[i].drivers[j].timeSec);
+        }
+    }
+    driver tmp;
+    for(int i=0;i<n;i++){
+        for(int j=0;j<race[i].numDrivers;j++){
+            for(int k=0;k<race[i].numDrivers-1;k++) {
+                if (race[i].drivers[k].timeSec > race[i].drivers[k + 1].timeSec) {
+                    tmp = race[i].drivers[k];
+                    race[i].drivers[k] = race[i].drivers[k + 1];
+                    race[i].drivers[k + 1] = tmp;
+                }
+            }
+        }
+    }
+
+    for(int i=0;i<n;i++){
+        printf("%s (%d Drivers)\n",race[i].location,race[i].numDrivers);
+        for(int j=0;j<3;j++){
+            printf("%d. %s %2d:%02d",j+1,race[i].drivers[j].name,
+                   race[i].drivers[j].timeSec/60,race[i].drivers[j].timeSec%60);
+            printf("\n");
+        }
+    }
+}
