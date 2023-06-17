@@ -1,0 +1,180 @@
+Define a class Goal that keeps information for:
+//the goal scorer (dynamically allocated array of characters),
+//time (the minute) of the goal scoring event (integer),
+//        name of the team that scored the goal (char array max 50).
+//For this class implement:
+//        constructor with all three arguments
+//        operator << for printing on ostream an object of class Goal (print the minute and the name)
+//operator ++ (postfix) notation for incrementing the minute for one,
+//operator -- (prefix) notation for decrementing the minute for one.
+//Also create a class Game that keeps dynamically allocated array of objects from the class
+//        Goal and the names of the teams that play that game (two char arrays of 50). For this class implement:
+//        constructor with two arguments the names of the teams that play the game
+//        the unary operator += for adding an object of class Goal in the array of objects.
+//If the name of the object from the class Goal is not equal to the one of the names of the
+//        teams that play the game then throw an exception of type InvalidTeamName. Handling the exception
+//        should be in the appropriate place in the main function, by printing the message Invalid team name: [the_name]
+//operator << for printing on the ostream the teams that play the game and all the scorers
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class InvalidTeamName{
+private:
+    char name[50];
+public:
+    InvalidTeamName(char *name=""){
+        strcpy(this->name,name);
+    }
+    void mes(){
+        cout<<"Invalid team name: "<<name<<endl;
+    }
+};
+
+class Goal{
+private:
+    char *goalScorer;
+    int time;
+    char nameTeam[50];
+    void copy(const Goal &other){
+        this->time=other.time;
+        strcpy(this->nameTeam,other.nameTeam);
+        this->goalScorer=new char[strlen(other.goalScorer)+1];
+        strcpy(this->goalScorer,other.goalScorer);
+    }
+public:
+    Goal(const Goal &other){
+        copy(other);
+    }
+    Goal(){
+        this->goalScorer=new char [0];
+        strcpy(this->goalScorer,"gs");
+        this->time=0;
+        strcpy(this->nameTeam,"t");
+    }
+    Goal &operator=(const Goal &other){
+        if(this!=&other){
+            delete goalScorer;
+            copy(other);
+        }
+        return *this;
+    }
+
+    Goal(char *goalScorer, int time, char *nameTeam){
+        this->time=time;
+        strcpy(this->nameTeam,nameTeam);
+        this->goalScorer=new char[strlen(goalScorer)];
+        strcpy(this->goalScorer,goalScorer);
+    }
+
+    friend ostream &operator<<(ostream &os, Goal &goal) {
+        os<<goal.time<<" "<<goal.goalScorer<<endl;
+        return os;
+    }
+    ~Goal(){
+        delete [] goalScorer;
+    }
+    Goal &operator++(int){ // postfix ++
+        Goal result(*this); // ista kopija so this objektot;
+        ++time;
+        return result;
+    }
+    Goal &operator--(){ //prefix --
+        --time;
+        return *this;
+    }
+
+    char *getNameTeam()  {
+        return nameTeam;
+    }
+};
+
+class Game{
+private:
+    Goal *goal;
+    int num;
+    char team1[50];
+    char team2[50];
+    void copy(const Game &other){
+        strcpy(this->team1,other.team1);
+        strcpy(this->team2,other.team2);
+        num=other.num;
+        this->goal=new Goal [num];
+        for(int i=0;i<num;i++){
+            this->goal[i]=other.goal[i];
+        }
+    }
+public:
+    Game(){
+        num=0;
+        this->goal=new Goal[0];
+        strcpy(this->team2,"tt");
+        strcpy(this->team1,"t");
+    }
+    Game(char *team1, char *team2){
+        strcpy(this->team1,team1);
+        strcpy(this->team2,team2);
+        num=0;
+        this->goal=new Goal[0];
+    }
+    Game & operator+=(Goal & add){
+        if(strcmp(add.getNameTeam(),team1) != 0 && strcmp(add.getNameTeam(),team2) != 0){
+            throw InvalidTeamName(add.getNameTeam());
+        }
+        Goal *temp=new  Goal[num+1];
+        for(int i=0;i<num;i++){
+            temp[i]=goal[i];
+        }
+        temp[num++]=add;
+        delete [] goal;
+        goal = temp;
+        return *this;
+    }
+    Game (const Game &other){
+        copy(other);
+    }
+    Game &operator=(const Game &other){
+        if(this!=&other){
+            delete [] goal;
+            copy(other);
+        }
+        return *this;
+    }
+    ~Game(){
+        delete [] goal;
+    }
+    friend ostream &operator<<(ostream &os, const Game &game) {
+        os<<game.team1<<" - "<<game.team2<<endl;
+        for(int i=0;i<game.num;i++){
+            os<<game.goal[i];
+        }
+        return os;
+    }
+};
+
+int main() {
+    char team1[50];
+    char team2[50];
+    cin >> team1;
+    cin >> team2;
+    Game n(team1, team2);
+    int x;
+    cin >> x;
+    char player[100];
+    int m;
+    for(int i = 0; i < x; ++i) {
+        cin >> player;
+        cin >> m;
+        cin >> team1;
+        Goal g(player, m, team1);
+        try {
+            n += g;
+        }
+        catch (InvalidTeamName &e){
+            e.mes();
+        }
+    }
+    cout << n << endl;
+    return 0;
+}
