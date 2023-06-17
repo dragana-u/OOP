@@ -1,0 +1,112 @@
+//Create a structure (in C programming language) Film for representing films (movies). The structure should contain: (5 points)
+//Movie title (array of 100 characters)
+//Duration (integer)
+//Price (decimal number)
+//Is there a student discount (1-yes, 0-no)
+//Create a structure FilmFestival, that will contain: (10 points)
+//Name of the festival (array of 100 characters)
+//Place (where the festival is held) (array of 100 characters)
+//List of films that will be presented on the festival (array of no more than 100 elements of type Film)
+//Number of elements in the list (integer)
+//Write a function print that will print the information for each film in a given film festival (5 points) in the following format:
+//[Name of the festival] [Place]
+//[Title1] [Duration1] [Price1]
+//[Title2] [Duration2] [Price2]
+//...
+//Write a function BestFestival that accepts an array of FilmFestival variables and number of festivals
+//in the array and will print the name of the festival that is cheapest for students and the place it is held.
+//For the cheapest festival is considered the one that has most films that have student
+//        discount. If there is more that one festival with these characteristics than print the festival that has the longest duration of all the films. (20 points)
+//Complete functionality of the whole program (5 points)
+
+#include<stdio.h>
+
+typedef struct Film{
+    char title[100];
+    int duration;
+    float price;
+    int studentDiscount; //1-da,0-ne
+}Film;
+
+typedef struct FilmFestival{
+    char name[100];
+    char place[100];
+    Film films[50];
+    int numFilms;
+}FilmFestival;
+
+
+void print(FilmFestival festival){
+    printf("%s %s\n",festival.name,festival.place);
+    for(int j=0;j<festival.numFilms;j++){
+        printf("%s %d %.2f\n",festival.films[j].title,festival.films[j].duration,festival.films[j].price);
+    }
+}
+
+int mostDiscount(FilmFestival festival) {
+    int brojac=0;
+    for(int i=0;i<festival.numFilms;i++){
+        if(festival.films[i].studentDiscount){
+            brojac++;
+        }
+    }
+    return brojac;
+}
+
+int longestDuration(FilmFestival festival) {
+    int brojac=0;
+    for(int i=0;i<festival.numFilms;i++){
+        brojac+=festival.films[i].duration;
+    }
+}
+
+void bestFestival(struct FilmFestival *festival, int n) {
+    int cheapest=0,najI=0,duration=0;
+    for(int i=0;i<n;i++){
+        for(int j=0;j<festival[i].numFilms;j++){
+            if(mostDiscount(festival[i])>cheapest){
+                cheapest= mostDiscount(festival[i]);
+                najI=i;
+            }else if(mostDiscount(festival[i])==cheapest){
+                if(longestDuration(festival[i])>duration){
+                    cheapest= mostDiscount(festival[i]);
+                    duration= longestDuration(festival[i]);
+                    najI=i;
+                }
+            }
+        }
+    }
+    printf("Najdobar festival: %s %s",festival[najI].name,festival[najI].place);
+}
+
+int main()
+{
+    int i, j, n, broj;
+    FilmFestival ff[50];
+    scanf("%d", &n);
+    for (i = 0; i < n; i++){
+        /* name of the festival */
+        scanf("%s", ff[i].name);
+        /* place it is held */
+        scanf("%s", ff[i].place);
+        /* number of movies */
+        scanf("%d", &ff[i].numFilms);
+
+        for (j = 0; j < ff[i].numFilms; j++){
+            scanf("%s", ff[i].films[j].title);  		/* title of the movie */
+            scanf("%d", &ff[i].films[j].duration); 		/* duration */
+            scanf("%f", &ff[i].films[j].price); 	/* price */
+            scanf("%d", &ff[i].films[j].studentDiscount);	/* discount */
+        }
+    }
+
+    for(i=0; i<n; ++i){
+        print(ff[i]);
+    }
+
+    bestFestival(ff, n);
+
+
+    return 0;
+}
+
