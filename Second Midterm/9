@@ -1,0 +1,452 @@
+Да се имплементира класа Trud во која се чуваат информации за: (5 поени)
+//вид на труд (еден знак и тоа C за конференциски труд, J за труд во списание)
+//година на издавање (цел број).
+//Да се имплементира класа Student во која се чува: (5 поени)
+//името на студентот (низа од најмногу 30 карактери)
+//индекс (цел број)
+//година на упис (цел број)
+//листа на оцени од положени предмети (низа од цели броеви)
+//број на положени предмети (цел број)
+//За оваа класа да се имплементираат следните методи:
+//функција rang() што пресметува просек од положените испити на студентот (5 поени)
+//оператор << за печатење на студентот во формат: (5 поени)
+//Индекс Име Година на упис ранг
+//Да се имплементира класа PhDStudent во која покрај основните информации за студентот дополнително се чува: (5 поени)
+//листа од објавени трудови (динамички резервирана низа од објекти од класата Trud)
+//бројот на трудови (цел број)
+//Во оваа класа да се препокрие соодветно функцијата rang() така што на просекот од положените испити
+//        ќе се додаде и збирот од поените од објавените трудови на PhD студентот. Во зависност од видот на трудот,
+//        секој универзитет има посебен начин на бодување на трудовите. Начинот на бодување е ист за сите PhD студенти.
+//Иницијално да се смета дека конференциски труд се бодува со 1 поен, а труд во списание со 3 поени. Универзитетот
+//        има можност да ги менува вредностите на бодовите. (5 поени + 5 поени)
+//За оваа класа да се обезбеди:
+//оператор += за додавање нов објект од класата Trud во листата (5 поени). Ако се направи обид да се внесе
+//        труд што е издаден порано од годината на упис на студентот да се фрли исклучок (објект од класата Exception).
+//Справувањето со исклучокот треба да се реализира во главната функција main каде што е потребно, но и во конструктор ако е потребно.
+//Ако бил генериран исклучок треба да се отпечати соодветна порака за грешка "Ne moze da se vnese dadeniot trud", а новиот
+//труд нема да се внесе во листата на трудови од студентот. (10 поени)
+//Напомена: Сите променливи на класите се чуваат како приватни.
+//Да се обезбедат сите потребни функции за правилно функционирање на програмата. (5 поени)
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class Exception{
+public:
+    Exception(){}
+    void showMes(){
+        cout<<"Ne moze da se vnese dadeniot trud"<<endl;
+    }
+};
+
+class Trud{
+    char vid; //C konferenciski, J trud vo spisanie
+    int godinaNaIzdavanje;
+public:
+    Trud(char vid='j', int godinaNaIzdavanje=0) :godinaNaIzdavanje(godinaNaIzdavanje) {
+        this->vid=vid;
+    }
+
+    char getVid() const{
+        return vid;
+    }
+
+    int getGodinaNaIzdavanje(){
+        return godinaNaIzdavanje;
+    }
+    friend istream &operator>>(istream &i, Trud &t){
+        i>>t.vid>>t.godinaNaIzdavanje;
+        return i;
+    }
+    friend class PhDStudent;
+};
+
+class Student{
+    char ime[30];
+    int indeks;
+    int godinaUpis;
+    int oceniOdPolozeniPredmeti[50];
+    int brPolozeniPredmeti;
+public:
+    Student(){
+        brPolozeniPredmeti=0;
+    }
+    Student(char *ime, int indeks, int godinaUpis, int *oceniOdPolozeniPredmeti, int brPolozeniPredmeti){
+        strcpy(this->ime,ime);
+        this->indeks=indeks;
+        this->godinaUpis=godinaUpis;
+        this->brPolozeniPredmeti=brPolozeniPredmeti;
+        for(int i=0;i<brPolozeniPredmeti;i++){
+            this->oceniOdPolozeniPredmeti[i]=oceniOdPolozeniPredmeti[i];
+        }
+    }
+    virtual double rang(){
+        double prosek=0.0;
+        for(int i=0;i<brPolozeniPredmeti;i++){
+            prosek+=(double)oceniOdPolozeniPredmeti[i];
+        }
+        return prosek/(double)brPolozeniPredmeti;
+    }
+
+    friend ostream &operator<<(ostream &os,Student &student) {
+        os<<student.indeks<<" "<<student.ime<<" "<<student.godinaUpis<<" "<<student.rang()<<endl;
+        return os;
+    }
+
+    int getGodinaUpis(){
+        return godinaUpis;
+    }
+
+    int getIndex() {
+        return indeks;
+    }
+};
+
+class PhDStudent : public Student{
+private:
+    Trud *trudovi;
+    int brTrudovi;
+    static int KonfTrud;
+    static int TrudSpisanie;
+public:
+    PhDStudent(char *ime, int indeks, int godinaUpis, int *oceniOdPolozeniPredmeti, int brPolozeniPredmeti,
+               Trud *trudovi, int brTrudovi) : Student(ime, indeks, godinaUpis, oceniOdPolozeniPredmeti,
+                                                       brPolozeniPredmeti){
+        int count=0;
+        this->trudovi=new Trud [brTrudovi];
+        for(int i=0;i<brTrudovi;i++){
+            try{
+                if(godinaUpis>trudovi[i].getGodinaNaIzdavanje()){
+                    throw Exception();
+                }else{
+                    this->trudovi[count]=trudovi[i];
+                    count++;
+                }
+            }
+            catch (Exception &e){
+                e.showMes();
+            }
+        }
+        this->brTrudovi=count;
+        }
+    ~PhDStudent(){
+        delete [] trudovi;
+    }
+    double rang(){
+       int br1=0,br2=0;
+       double prosek=Student::rang();
+       for(int i=0;i<brTrudovi;i++){
+           if(trudovi[i].getVid()=='C' || trudovi[i].getVid()=='c'){
+               if(getGodinaUpis() <= trudovi[i].godinaNaIzdavanje) {
+                   br1++;
+               }
+           }else {
+               br2++;
+           }
+       }
+       return prosek+br1*KonfTrud+br2*TrudSpisanie;
+    }
+    PhDStudent & operator +=(Trud &nov){
+        try {
+            if (nov.getGodinaNaIzdavanje() < getGodinaUpis()) {
+                throw Exception();
+            }
+        }
+        catch (Exception &e){
+            e.showMes();
+        }
+        Trud *temp = new Trud [brTrudovi+1];
+        for(int i=0;i<brTrudovi;i++){
+            temp[i]=trudovi[i];
+        }
+        temp[brTrudovi++]=nov;
+        delete [] trudovi;
+        trudovi=temp;
+        return *this;
+    }
+    static void setKonf(int konf){
+        KonfTrud=konf;
+    }
+    static void setSpisanie(int spis){
+        TrudSpisanie=spis;
+    }
+};
+int PhDStudent::KonfTrud=1;
+int PhDStudent::TrudSpisanie=3;
+int main(){
+    int testCase;
+    cin >> testCase;
+
+    int god, indeks, n, god_tr, m, n_tr;
+    int izbor; //0 za Student, 1 za PhDStudent
+    char ime[30];
+    int oceni[50];
+    char tip;
+    Trud trud[50];
+
+    if (testCase == 1){
+        cout << "===== Testiranje na klasite ======" << endl;
+        cin >> ime;
+        cin >> indeks;
+        cin >> god;
+        cin >> n;
+        for (int j = 0; j < n; j++)
+            cin >> oceni[j];
+        Student s(ime, indeks, god, oceni, n);
+        cout << s;
+
+        cin >> ime;
+        cin >> indeks;
+        cin >> god;
+        cin >> n;
+        for (int j = 0; j < n; j++)
+            cin >> oceni[j];
+        cin >> n_tr;
+        for (int j = 0; j < n_tr; j++){
+            cin >> tip;
+            cin >> god_tr;
+            Trud t(tip, god_tr);
+            trud[j] = t;
+        }
+        PhDStudent phd(ime, indeks, god, oceni, n, trud, n_tr);
+        cout << phd;
+    }
+    if (testCase == 2){
+        cout << "===== Testiranje na operatorot += ======" << endl;
+        Student **niza;
+        cin >> m;
+        niza = new Student *[m];
+        for (int i = 0; i<m; i++){
+            cin >> izbor;
+            cin >> ime;
+            cin >> indeks;
+            cin >> god;
+            cin >> n;
+            for (int j = 0; j < n; j++)
+                cin >> oceni[j];
+
+            if (izbor == 0){
+                niza[i] = new Student(ime, indeks, god, oceni, n);
+            }
+            else{
+                cin >> n_tr;
+                for (int j = 0; j < n_tr; j++){
+                    cin >> tip;
+                    cin >> god_tr;
+                    Trud t(tip, god_tr);
+                    trud[j] = t;
+                }
+                niza[i] = new PhDStudent(ime, indeks, god, oceni, n, trud, n_tr);
+            }
+        }
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+
+        // dodavanje nov trud za PhD student spored indeks
+        Trud t;
+        cin >> indeks;
+        cin >> t;
+
+        // vmetnete go kodot za dodavanje nov trud so pomos na operatorot +=
+        for(int i=0;i<m;i++) {
+            if (niza[i]->getIndex() == indeks) {
+                PhDStudent *tmp = dynamic_cast<PhDStudent *>(niza[i]);
+                if (tmp) {
+                    try {
+                        *tmp += t;
+                    }
+                    catch (Exception &e) {
+                        e.showMes();
+                    }
+                } else cout << "Ne postoi PhD student so indeks " << indeks << endl;
+            }
+        }
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+    }
+    if (testCase == 3){
+        cout << "===== Testiranje na operatorot += ======" << endl;
+        Student **niza;
+        cin >> m;
+        niza = new Student *[m];
+        for (int i = 0; i<m; i++){
+            cin >> izbor;
+            cin >> ime;
+            cin >> indeks;
+            cin >> god;
+            cin >> n;
+            for (int j = 0; j < n; j++)
+                cin >> oceni[j];
+
+            if (izbor == 0){
+                niza[i] = new Student(ime, indeks, god, oceni, n);
+            }
+            else{
+                cin >> n_tr;
+                for (int j = 0; j < n_tr; j++){
+                    cin >> tip;
+                    cin >> god_tr;
+                    Trud t(tip, god_tr);
+                    trud[j] = t;
+                }
+                niza[i] = new PhDStudent(ime, indeks, god, oceni, n, trud, n_tr);
+            }
+        }
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+
+        // dodavanje nov trud za PhD student spored indeks
+        Trud t;
+        cin >> indeks;
+        cin >> t;
+
+        // vmetnete go kodot za dodavanje nov trud so pomos na operatorot += od Testcase 2
+        for(int i=0;i<m;i++) {
+            if (niza[i]->getIndex() == indeks) {
+                PhDStudent *tmp = dynamic_cast<PhDStudent *>(niza[i]);
+                if (tmp) {
+                    try {
+                        *tmp += t;
+                    }
+                    catch (Exception &e) {
+                        e.showMes();
+                    }
+                } else cout << "Ne postoi PhD student so indeks " << indeks << endl;
+            }
+        }
+
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+    }
+    if (testCase == 4){
+        cout << "===== Testiranje na isklucoci ======" << endl;
+        cin >> ime;
+        cin >> indeks;
+        cin >> god;
+        cin >> n;
+        for (int j = 0; j < n; j++)
+            cin >> oceni[j];
+        cin >> n_tr;
+        for (int j = 0; j < n_tr; j++){
+            cin >> tip;
+            cin >> god_tr;
+            Trud t(tip, god_tr);
+            trud[j] = t;
+        }
+        PhDStudent phd(ime, indeks, god, oceni, n, trud, n_tr);
+        cout << phd;
+    }
+    if (testCase == 5){
+        cout << "===== Testiranje na isklucoci ======" << endl;
+        Student **niza;
+        cin >> m;
+        niza = new Student *[m];
+        for (int i = 0; i<m; i++){
+            cin >> izbor;
+            cin >> ime;
+            cin >> indeks;
+            cin >> god;
+            cin >> n;
+            for (int j = 0; j < n; j++)
+                cin >> oceni[j];
+
+            if (izbor == 0){
+                niza[i] = new Student(ime, indeks, god, oceni, n);
+            }
+            else{
+                cin >> n_tr;
+                for (int j = 0; j < n_tr; j++){
+                    cin >> tip;
+                    cin >> god_tr;
+                    Trud t(tip, god_tr);
+                    trud[j] = t;
+                }
+                niza[i] = new PhDStudent(ime, indeks, god, oceni, n, trud, n_tr);
+            }
+        }
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+
+        // dodavanje nov trud za PhD student spored indeks
+        Trud t;
+        cin >> indeks;
+        cin >> t;
+
+        // vmetnete go kodot za dodavanje nov trud so pomos na operatorot += i spravete se so isklucokot
+        for(int i=0;i<m;i++) {
+            if (niza[i]->getIndex() == indeks) {
+                PhDStudent *tmp = dynamic_cast<PhDStudent *>(niza[i]);
+                if (tmp) {
+                    try {
+                        *tmp += t;
+                    }
+                    catch (Exception &e) {
+                        e.showMes();
+                    }
+                } else cout << "Ne postoi PhD student so indeks " << indeks << endl;
+            }
+        }
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+    }
+    if (testCase == 6){
+        cout << "===== Testiranje na static clenovi ======" << endl;
+        Student **niza;
+        cin >> m;
+        niza = new Student *[m];
+        for (int i = 0; i<m; i++){
+            cin >> izbor;
+            cin >> ime;
+            cin >> indeks;
+            cin >> god;
+            cin >> n;
+            for (int j = 0; j < n; j++)
+                cin >> oceni[j];
+
+            if (izbor == 0){
+                niza[i] = new Student(ime, indeks, god, oceni, n);
+            }
+            else{
+                cin >> n_tr;
+                for (int j = 0; j < n_tr; j++){
+                    cin >> tip;
+                    cin >> god_tr;
+                    Trud t(tip, god_tr);
+                    trud[j] = t;
+                }
+                niza[i] = new PhDStudent(ime, indeks, god, oceni, n, trud, n_tr);
+            }
+        }
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+
+        int conf, journal;
+        cin >> conf;
+        cin >> journal;
+
+        //postavete gi soodvetnite vrednosti za statickite promenlivi
+        PhDStudent::setKonf(conf);
+        PhDStudent::setSpisanie(journal);
+        // pecatenje na site studenti
+        cout << "\nLista na site studenti:\n";
+        for (int i = 0; i < m; i++)
+            cout << *niza[i];
+    }
+
+    return 0;
+}
