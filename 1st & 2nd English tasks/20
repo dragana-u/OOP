@@ -1,0 +1,145 @@
+//Define a class Word that will have dynamically allocated array of characters. 
+//The class should only allow constructing objects by single constructor with one argument 
+//(array of characters), and if this argument is missing its value should be "UNDEFINED".
+//Define a class Sentence that contains:
+//dynamically allocated array of objects of class Word
+//number of words
+//total capacity.
+//For this class define constructor with single argument, the max capacity of words, which will be predefined to 10 if missing. Implement the following methods:
+//void add(Word w) for adding a new word in the array of words. During addition if the capacity is full, a new extended array is allocated increased for 10 new words,
+//print() that will print all the words separated with one blank space,
+//swap(int i, int j) that will swap the words in the array at the passed indices i and j.
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class Word{
+    char *arr;
+    void copy(const Word &other){
+        this->arr=new char [strlen(other.arr)+1];
+        strcpy(this->arr,other.arr);
+    }
+public:
+    Word(char *arr="UNDEFINED"){
+        this->arr=new char [strlen(arr)+1];
+        strcpy(this->arr,arr);
+    }
+    Word(const Word &other){
+        copy(other);
+    }
+    ~Word(){
+        delete [] arr;
+    }
+    Word & operator = (const Word &other){
+        if(this!=&other){
+            delete [] arr;
+            copy(other);
+        }
+        return *this;
+    }
+    void print(){
+        cout<<arr<<" ";
+    }
+
+    char *getArr() const {
+        return arr;
+    }
+
+    void setArr(char *arr) {
+        this->arr = new char [strlen(arr)+1];
+        strcpy(this->arr,arr);
+    }
+};
+
+class Sentence{
+    Word *words;
+    int numWords;
+    int capacity;
+    void copy(const Sentence &other){
+        this->capacity=other.capacity;
+        this->numWords=other.numWords;
+        this->words=new Word [other.capacity];
+        for(int i=0;i<other.numWords;i++){
+            this->words[i]=other.words[i];
+        }
+    }
+public:
+    Sentence(int capacity=10){
+        this->capacity=capacity;
+        numWords=0;
+        this->words=new Word [capacity];
+//        for(int i=0;i<numWords;i++){
+//            this->words[i]=words[i];
+//        }
+    }
+    Sentence(const Sentence &other){
+        copy(other);
+    }
+    ~Sentence(){
+        delete [] words;
+    }
+    Sentence & operator=(const Sentence &other){
+        if(this!=&other){
+            delete [] words;
+            copy(other);
+        }
+        return *this;
+    }
+    void increaseCapacity() {
+        Word * tmp = new Word[this->capacity+10];
+        for (int i=0;i<numWords;i++){
+            tmp[i]=words[i];
+        }
+        delete [] words;
+        words = tmp;
+        this->capacity+=10;
+    }
+
+    void add(Word word) {
+        if (this->numWords == this->capacity){
+            increaseCapacity();
+        }
+
+        words[numWords++]=word;
+    }
+
+    void print() {
+        for(int i=0;i<numWords;i++){
+            words[i].print();
+        }
+        cout<<endl;
+    }
+
+    void swap(int i, int i1) {
+        Word tmp = words[i]; //copy const
+        words[i] = words[i1]; // operator =
+        words[i1] = tmp;
+
+    }
+};
+
+int main() {
+    int n;
+    cin >> n;
+    cin.get();
+    cout << "CONSTRUCTOR" << endl;
+    Sentence s;
+    cout << "ADD WORD" << endl;
+    for (int i = 0; i < n; ++i) {
+        char w[100];
+        cin.getline(w, 100);
+        Word word(w);
+        s.add(word);
+    }
+    cout << "PRINT SENTENCE" << endl;
+    s.print();
+    cout << "COPY" << endl;
+    Sentence x = s;
+    cout << "SWAP" << endl;
+    x.swap(n / 2, n / 3);
+    x.print();
+    cout << "ORIGINAL" << endl;
+    s.print();
+    return 0;
+}
