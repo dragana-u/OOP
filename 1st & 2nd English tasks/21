@@ -1,0 +1,74 @@
+//Create a structure SkiLift with the following information:
+//name(char array 15)
+//maximum number of users for one ride
+//whether the lift is in function.
+//Then create a structure SkiCenter with:
+//name of the ski center (char array with max 20 character)
+//the country(char array with max 20 chars)
+//array of ski lifts(maximum 20 sifts)
+//number of ski lifts.
+//Implement a function:
+//void biggestCapacity(SkiCenter *sc, int n)
+//which will print the ski center with the biggest capacity for skiers at the same time.
+//If there are two ski centers with the same capacity, print the one with more ski lifts. \
+//The printing should be in different lines (one for Name, one for Country, one for Capacity).
+//When calculating the capacity, only consider the ski lifts which are in function!
+
+#include<stdio.h>
+#include<string.h>
+
+typedef struct skiLift{
+    char name[15];
+    int maxUsers;
+    int inFunction; //1 da,0 ne
+}skiLift;
+
+typedef struct skiCenter{
+    char name[20];
+    char country[20];
+    skiLift lifts[20];
+    int numSkiLifts;
+}skiCenter;
+void biggestCapacity(skiCenter *sc, int n){
+    int max=0, najI=0;
+    int sum=0;
+    for(int i=0;i<n;i++){
+        for(int j=0;j<sc[i].numSkiLifts;j++) {
+            if (sc[i].lifts[j].inFunction){
+              sum+= sc[i].lifts[j].maxUsers;
+            }
+        }
+        if(sum>max){
+            max=sum;
+            najI=i;
+        }else if(sum==max){
+            if(sc[i].numSkiLifts>sc[najI].numSkiLifts){
+                max=sum;
+                najI=i;
+            }
+        }
+        sum=0;
+    }
+    printf("%s\n%s\n",sc[najI].name,sc[najI].country);
+    printf("%d",max);
+}
+int main() {
+    int n;
+    scanf("%d", &n);
+    skiCenter sc[15];
+    for (int i = 0; i < n; i++) {
+
+        //scan the name, country and number of lifts
+        scanf("%s %s %d",sc[i].name,sc[i].country,&sc[i].numSkiLifts);
+        //per each ski lift scan:
+        for(int j=0;j<sc[i].numSkiLifts;j++) {
+            //the name
+            scanf("%s %d %d",sc[i].lifts[j].name,&sc[i].lifts[j].maxUsers,
+                  &sc[i].lifts[j].inFunction);
+            //the max number of users
+            //wether is in function
+        }
+    }
+    //call the method biggestCapacity
+    biggestCapacity(sc,n);
+}
